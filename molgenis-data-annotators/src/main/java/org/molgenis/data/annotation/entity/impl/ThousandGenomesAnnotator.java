@@ -1,12 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.CHROMOSOMES;
-import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.FILEPATTERN;
-import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
-import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.ROOT_DIRECTORY;
-
-import java.util.Collections;
-
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -27,6 +20,10 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Collections;
+
+import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.*;
 
 @Configuration
 public class ThousandGenomesAnnotator
@@ -78,7 +75,7 @@ public class ThousandGenomesAnnotator
 						FieldTypeEnum.DECIMAL)));
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) -> {
+				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName, redisDB) -> {
 					thousendGenomesAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
 					thousendGenomesAnnotatorSettings.set(FILEPATTERN,
 							"ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");

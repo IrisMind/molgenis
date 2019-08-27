@@ -30,25 +30,7 @@ import static org.elasticsearch.common.base.Preconditions.checkNotNull;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FILTER_META;
-import static org.molgenis.data.vcf.VcfRepository.ID;
-import static org.molgenis.data.vcf.VcfRepository.ID_META;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.INTERNAL_ID;
-import static org.molgenis.data.vcf.VcfRepository.NAME;
-import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.POS_META;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
+import static org.molgenis.data.vcf.VcfRepository.*;
 
 public class VcfToEntity
 {
@@ -106,6 +88,9 @@ public class VcfToEntity
 		entityMetaData.addAttributeMetaData(FILTER_META);
 		entityMetaData.addAttributeMetaData(QUAL_META);
 		entityMetaData.addAttributeMetaData(ID_META);
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(vcfMeta.getColNames()[9],
+				MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION));
+
 		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
 		idAttributeMetaData.setVisible(false);

@@ -1,8 +1,5 @@
 package org.molgenis.data.annotation.resources.impl;
 
-import java.io.File;
-import java.util.Iterator;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -10,6 +7,9 @@ import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Iterator;
 
 /**
  * Implementation of {@link Resource}, a file-based repository. The location of the file is configured in
@@ -22,6 +22,7 @@ public class ResourceImpl implements Resource
 	private final ResourceConfig config;
 	// the file the current repository works on
 	private volatile File file;
+	private volatile Integer redisDBIndex;
 	// the current repository
 	private volatile Repository repository;
 
@@ -111,9 +112,10 @@ public class ResourceImpl implements Resource
 			try
 			{
 				file = getFile();
+				redisDBIndex = getRedisDBIndex();
 				if (file != null)
 				{
-					repository = repositoryFactory.createRepository(file);
+					repository = repositoryFactory.createRepository(file, redisDBIndex);
 				}
 			}
 			catch (Exception e)
@@ -126,6 +128,10 @@ public class ResourceImpl implements Resource
 	private synchronized File getFile()
 	{
 		return config.getFile();
+	}
+	private synchronized Integer getRedisDBIndex()
+	{
+		return config.getRedisDBIndex();
 	}
 
 	@Override

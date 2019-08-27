@@ -150,7 +150,15 @@ public class CmdLineAnnotator
 			}
 		}
 
-		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
+		Integer redisDB = 0;
+
+		if (annotator.getSimpleName() == "cadd"){
+			redisDB = 1;
+		} else if (annotator.getSimpleName() == "exac"){
+			redisDB = 2;
+		}
+
+		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath(), options.has("redisDB") ? (Integer)options.valueOf("redisDB") : redisDB);
 		annotate(annotator, inputVcfFile, outputVCFFile, options);
 	}
 
@@ -204,6 +212,7 @@ public class CmdLineAnnotator
 				"Enables output file override, replacing a file with the same name as the argument for the -o option");
 		parser.acceptsAll(asList("u", "update-annotations"),
 				"Enables add/updating of annotations, i.e. CADD scores from a different source, by reusing existing annotations when no match was found.");
+		parser.acceptsAll(asList("rdb", "redisDB"), "Redis DB to use").withRequiredArg().ofType(Integer.class).defaultsTo(2);
 
 		return parser;
 	}

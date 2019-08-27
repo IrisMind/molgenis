@@ -97,7 +97,7 @@ public class GavinAnnotator
 		AnnotatorInfo gavinInfo = AnnotatorInfo.create(AnnotatorInfo.Status.READY,
 				AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description, attributes);
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, new GeneNameQueryCreator(),
-				dataService, resources, (annotationSourceFileName) -> {
+				dataService, resources, (annotationSourceFileName, redisDB) -> {
 					gavinAnnotatorSettings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION,
 							annotationSourceFileName);
 				})

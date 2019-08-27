@@ -1,40 +1,8 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.AGE_GROUP;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.COMMENTS;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.CONDITION;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ENTREZ_GENE_ID;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.GENE;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.HGNC_ID;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INHERITANCE;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_CATEGORIES;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_RATIONALE;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.MANIFESTATION_CATEGORIES;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.REFERENCES;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.DOMINANT;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.DOM_OR_REC;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.OTHER;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.RECESSIVE;
-import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.XLINKED;
-import static org.molgenis.data.annotator.websettings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
@@ -42,7 +10,6 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.filter.FirstResultFilter;
-import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -54,6 +21,19 @@ import org.molgenis.data.support.EffectsMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.*;
+import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.*;
+import static org.molgenis.data.annotator.websettings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
 
 /**
  * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an entity that has a attribute named 'GENE'
@@ -159,6 +139,11 @@ public class CGDAnnotator
 					public Repository createRepository(File file) throws IOException
 					{
 						return new GeneCsvRepository(file, GENE.getCgdName(), GENE.getAttributeName(), SEPARATOR);
+					}
+					@Override
+					public Repository createRepository(File file, Integer redisDBIndex) throws IOException
+					{
+						return createRepository(file);
 					}
 				});
 	}

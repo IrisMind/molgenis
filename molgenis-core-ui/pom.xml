@@ -220,5 +220,10 @@
    			<artifactId>UserAgentUtils</artifactId>
    			<version>1.17</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-core-ui</artifactId>
+            <version>1.21.1</version>
+        </dependency>
+    </dependencies>
 </project>

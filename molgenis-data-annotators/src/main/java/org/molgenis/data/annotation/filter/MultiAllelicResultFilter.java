@@ -132,6 +132,9 @@ public class MultiAllelicResultFilter implements ResultFilter
 		List<Entity> result = Lists.newArrayList();
 		Map<String, String> alleleValueMap = new HashMap<>();
 		Map<String, String> sourceAlleleValueMap = new HashMap<>();
+		if (resourceEntity.getString(VcfRepository.ALT) == null){
+			return result;
+		}
 		String[] alts = resourceEntity.getString(VcfRepository.ALT).split(",");
 		String[] sourceAlts = sourceEntity.getString(VcfRepository.ALT).split(",");
 		for (AttributeMetaData attributeMetaData : attributes)

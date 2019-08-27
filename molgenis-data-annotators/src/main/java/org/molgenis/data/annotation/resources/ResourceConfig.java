@@ -8,4 +8,5 @@ import java.io.File;
 public interface ResourceConfig
 {
 	public File getFile();
+	public Integer getRedisDBIndex();
 }

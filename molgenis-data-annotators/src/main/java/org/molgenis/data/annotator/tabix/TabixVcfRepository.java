@@ -1,17 +1,7 @@
 package org.molgenis.data.annotator.tabix;
 
-import static org.elasticsearch.common.base.Preconditions.checkNotNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -21,9 +11,15 @@ import org.molgenis.data.vcf.VcfReaderFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.elasticsearch.common.base.Preconditions.checkNotNull;
 
 /**
  * An indexed VCF Repository
@@ -32,17 +28,30 @@ public class TabixVcfRepository extends VcfRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TabixVcfRepository.class);
 	private final TabixReader tabixReader;
+	private Jedis jedis;
 
 	public TabixVcfRepository(File file, String entityName) throws IOException
 	{
 		super(file, entityName);
 		tabixReader = new TabixReader(file.getCanonicalPath());
+		this.jedis = new Jedis("localhost", 6379, 30000);
+		jedis.select(-1);
 	}
 
-	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName)
+	public TabixVcfRepository(File file, Integer redisDBIndex, String entityName) throws IOException
+	{
+		super(file, entityName);
+		tabixReader = new TabixReader(file.getCanonicalPath());
+		this.jedis = new Jedis("localhost", 6379, 30000);
+		jedis.select(redisDBIndex);
+	}
+
+	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, Integer redisDBIndex, String entityName)
 	{
 		super(readerFactory, entityName);
 		this.tabixReader = tabixReader;
+		this.jedis = new Jedis("localhost", 6379, 30000);
+		jedis.select(redisDBIndex);
 	}
 
 	@Override
@@ -98,12 +107,32 @@ public class TabixVcfRepository extends VcfRepository
 	 */
 	public synchronized List<Entity> query(String chrom, long posFrom, long posTo)
 	{
+		if (posFrom != posTo){
+			LOG.error("posFrom != posTo, Redis Query will not work");
+		}
+
 		String queryString = String.format("%s:%s-%s", checkNotNull(chrom), checkNotNull(posFrom), checkNotNull(posTo));
-		try
-		{
-			Collection<String> lines = getLines(tabixReader.query(queryString));
-			return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
-					.filter(entity -> positionMatches(entity, posFrom, posTo)).collect(Collectors.toList());
+		try {
+			String redisResult = jedis.get(String.format("%s:%s", chrom, posFrom));
+			if (redisResult != null) {
+				if (redisResult.isEmpty()){
+					return new ArrayList<Entity>();
+				}
+				Collection<String> lines = new ArrayList<String>();
+				lines.add(redisResult);
+				return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
+						.filter(entity -> positionMatches(entity, posFrom, posTo)).collect(Collectors.toList());
+			} else {
+                LOG.error(String.format("Redis miss: %s", queryString));
+				Collection<String> lines = getLines(tabixReader.query(queryString));
+				if (lines.size() > 0) {
+					jedis.set(String.format("%s:%s", chrom, posFrom), lines.iterator().next());
+				} else if (lines.size() == 0){
+					jedis.set(String.format("%s:%s", chrom, posFrom), "");
+				}
+				return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
+						.filter(entity -> positionMatches(entity, posFrom, posTo)).collect(Collectors.toList());
+			}
 		}
 		catch (NullPointerException e)
 		{

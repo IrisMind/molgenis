@@ -102,6 +102,11 @@ public class HPOAnnotator
 					{
 						return new HPORepository(file);
 					}
+					@Override
+					public Repository createRepository(File file, Integer redisDBIndex) throws IOException
+					{
+						return createRepository(file);
+					}
 				});
 	}
 

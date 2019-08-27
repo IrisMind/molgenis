@@ -25,4 +25,8 @@ public class TabixRepositoryFactory implements RepositoryFactory
 		return new TabixRepository(file, emd);
 	}
 
+	@Override
+	public Repository createRepository(File file, Integer redisDBIndex) throws IOException {
+		return new TabixRepository(file, redisDBIndex, emd);
+	}
 }

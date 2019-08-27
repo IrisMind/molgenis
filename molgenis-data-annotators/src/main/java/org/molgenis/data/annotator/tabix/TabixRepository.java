@@ -1,34 +1,23 @@
 package org.molgenis.data.annotator.tabix;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
-import org.molgenis.data.RepositoryCapability;
+import au.com.bytecode.opencsv.CSVParser;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import org.molgenis.data.*;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Stream;
 
-import au.com.bytecode.opencsv.CSVParser;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
 
 public class TabixRepository extends AbstractRepository
 {
@@ -38,6 +27,7 @@ public class TabixRepository extends AbstractRepository
 	private EntityMetaData entityMetaData;
 	private final String chromosomeAttributeName;
 	private final String positionAttributeName;
+	private Jedis jedis;
 
 	/**
 	 * Creates a new {@link TabixRepository}
@@ -51,25 +41,34 @@ public class TabixRepository extends AbstractRepository
 	 */
 	public TabixRepository(File file, EntityMetaData entityMetaData) throws IOException
 	{
-		this(file, entityMetaData, CHROM, POS);
+		this(file, -1, entityMetaData, CHROM, POS);
 	}
 
-	public TabixRepository(File file, EntityMetaData entityMetaData, String chromosomeAttributeName,
+	public TabixRepository(File file, Integer redisDBIndex, EntityMetaData entityMetaData) throws IOException
+	{
+		this(file, redisDBIndex, entityMetaData, CHROM, POS);
+	}
+
+	public TabixRepository(File file, Integer redisDBIndex, EntityMetaData entityMetaData, String chromosomeAttributeName,
 			String positionAttributeName) throws IOException
 	{
 		this.entityMetaData = entityMetaData;
 		this.reader = new TabixReader(file.getAbsolutePath());
 		this.chromosomeAttributeName = requireNonNull(chromosomeAttributeName);
 		this.positionAttributeName = requireNonNull(positionAttributeName);
+		this.jedis = new Jedis();
+		jedis.select(redisDBIndex);
 	}
 
-	TabixRepository(TabixReader reader, EntityMetaData entityMetaData, String chromosomeAttributeName,
+	TabixRepository(TabixReader reader, Integer redisDBIndex, EntityMetaData entityMetaData, String chromosomeAttributeName,
 			String positionAttributeName)
 	{
 		this.reader = requireNonNull(reader);
 		this.entityMetaData = requireNonNull(entityMetaData);
 		this.chromosomeAttributeName = requireNonNull(chromosomeAttributeName);
 		this.positionAttributeName = requireNonNull(positionAttributeName);
+		this.jedis = new Jedis();
+		jedis.select(redisDBIndex);
 	}
 
 	public static CSVParser getCsvParser()
@@ -122,27 +121,57 @@ public class TabixRepository extends AbstractRepository
 		Builder<Entity> builder = ImmutableList.<Entity> builder();
 		try
 		{
-			org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
-			if (iterator != null)
+			String redisResult = null;
+			try {
+				redisResult = jedis.get(String.format("%s:%s", chrom, pos));
+			} catch (redis.clients.jedis.exceptions.JedisConnectionException e){
+				LOG.error("Unable to query Redis, falling back to Tabix Query : " + e.getStackTrace());
+			} catch (redis.clients.jedis.exceptions.JedisDataException e){
+				LOG.error("Unable to query Redis, falling back to Tabix Query : " + e.getStackTrace());
+			}
+			if (redisResult != null)
 			{
-				String line = iterator.next();
-				while (line != null)
-				{
-					Entity entity = toEntity(line);
+				String[] lines = redisResult.split("\n", 0);
+				for(int i = 0; i < lines.length; i++){
+					Entity entity = toEntity(String.format("%s\t%s\t%s", chrom, pos, lines[i]));
 					if (entity.getLong(positionAttributeName) == pos)
 					{
 						builder.add(entity);
 					}
 					else
 					{
-						LOG.warn("TabixReader returns entity that does not match the query!");
+						LOG.warn("RedisReader returns entity that does not match the query!");
 					}
-					line = iterator.next();
 				}
-			}
-			else
-			{
-				return ImmutableList.of(); // empty list
+			} else {
+				org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
+				if (iterator != null)
+				{
+					LOG.error(String.format("Redis miss: %s", queryString));
+					String line = iterator.next();
+					List<String> list = new ArrayList<>();
+					while (line != null)
+					{
+						Entity entity = toEntity(line);
+						if (entity.getLong(positionAttributeName) == pos)
+						{
+							builder.add(entity);
+						}
+						else
+						{
+							LOG.warn("TabixReader returns entity that does not match the query!");
+						}
+						list.add(line.substring(line.indexOf("\t", line.indexOf("\t")+1)+1));
+						line = iterator.next();
+					}
+
+					String result = String.join("\n", list);
+					jedis.set(String.format("%s:%s", chrom, pos), result);
+				}
+				else
+				{
+					return ImmutableList.of(); // empty list
+				}
 			}
 		}
 		catch (IOException e)

@@ -8,7 +8,7 @@ import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 public class EmptyCmdLineAnnotatorSettingsConfigurer implements CmdLineAnnotatorSettingsConfigurer
 {
 	@Override
-	public void addSettings(String annotationSourceFileName)
+	public void addSettings(String annotationSourceFileName, Integer redisDBIndex)
 	{
 	}
 }

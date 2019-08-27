@@ -1,20 +1,5 @@
 package org.molgenis.data.annotator.tabix;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.POS_META;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Stream;
-
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
@@ -25,6 +10,18 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.vcf.VcfRepository.*;
+import static org.testng.Assert.assertEquals;
 
 public class TabixRepositoryTest
 {
@@ -45,7 +42,7 @@ public class TabixRepositoryTest
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("Description").setNillable(false));
 
 		entityMetaData = emd;
-		tabixRepository = new TabixRepository(tabixReader, entityMetaData, CHROM, POS);
+		tabixRepository = new TabixRepository(tabixReader, 0, entityMetaData, CHROM, POS);
 	}
 
 	@Test

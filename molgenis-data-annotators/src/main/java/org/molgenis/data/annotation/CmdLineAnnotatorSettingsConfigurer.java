@@ -6,5 +6,5 @@ package org.molgenis.data.annotation;
  */
 public interface CmdLineAnnotatorSettingsConfigurer
 {
-	void addSettings(String annotationSourceFileName);
+	void addSettings(String annotationSourceFileName, Integer redisDBIndex);
 }

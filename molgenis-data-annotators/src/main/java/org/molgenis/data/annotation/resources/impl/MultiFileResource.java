@@ -1,11 +1,5 @@
 package org.molgenis.data.annotation.resources.impl;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -15,6 +9,12 @@ import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.vcf.VcfRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class MultiFileResource implements Resource {
     private final String name;
@@ -45,6 +45,15 @@ public class MultiFileResource implements Resource {
                     }
                     File file = resourceConfig.getFile();
                     return file;
+                }
+                @Override
+                public Integer getRedisDBIndex(){
+                    ResourceConfig resourceConfig = config.getConfigs().get(key);
+                    if (resourceConfig == null) {
+                        initializeResources();
+                        return null;
+                    }
+                    return resourceConfig.getRedisDBIndex();
                 }
 
             }, factory));

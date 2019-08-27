@@ -46,4 +46,9 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 		return inMemoryRepository;
 	}
 
+	@Override
+	public Repository createRepository(File file, Integer redisDBIndex) throws IOException {
+		return createRepository(file);
+	}
+
 }

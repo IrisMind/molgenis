@@ -111,6 +111,11 @@ public class OmimAnnotator
 					{
 						return new OmimRepository(file);
 					}
+					@Override
+					public Repository createRepository(File file, Integer redisDBIndex) throws IOException
+					{
+						return createRepository(file);
+					}
 				});
 	}
 

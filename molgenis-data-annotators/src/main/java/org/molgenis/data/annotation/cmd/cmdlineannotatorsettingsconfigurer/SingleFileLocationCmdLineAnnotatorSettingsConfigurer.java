@@ -18,9 +18,10 @@ public class SingleFileLocationCmdLineAnnotatorSettingsConfigurer implements Cmd
 	}
 
 	@Override
-	public void addSettings(String annotationSourceFileName)
+	public void addSettings(String annotationSourceFileName, Integer redisDBIndex)
 	{
 		pluginSettings.set(fileLocationAttributeName, annotationSourceFileName);
+		pluginSettings.set("redisDBIndex", redisDBIndex);
 	}
 
 }

@@ -1,13 +1,13 @@
 package org.molgenis.data.annotation.resources.impl;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by charbonb on 15/06/15.
@@ -79,6 +79,12 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 					}
 
 					return this.file;
+				}
+
+				@Override
+				public Integer getRedisDBIndex()
+				{
+					return 0;
 				}
 
 			});

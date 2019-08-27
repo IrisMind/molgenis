@@ -50,7 +50,7 @@ public class AnnotatorUpdateIT
 
 				RepositoryAnnotator caddAnnotator = annotators.get("cadd");
 				caddAnnotator.getCmdLineAnnotatorSettingsConfigurer()
-						.addSettings("src/test/resources/cadd/AnnotatorUpdateIT_CADD_ESP6500SI_7lines.tsv.gz");
+						.addSettings("src/test/resources/cadd/AnnotatorUpdateIT_CADD_ESP6500SI_7lines.tsv.gz", -1);
 
 				// first without updating
 				Iterator<Entity> noUpdateIt = caddAnnotator.annotate(repo, false);
@@ -80,7 +80,7 @@ public class AnnotatorUpdateIT
 				// and now with updating
 				RepositoryAnnotator caddAnnotatorUpdating = annotators.get("cadd");
 				caddAnnotatorUpdating.getCmdLineAnnotatorSettingsConfigurer()
-						.addSettings("src/test/resources/cadd/AnnotatorUpdateIT_CADD_ESP6500SI_7lines.tsv.gz");
+						.addSettings("src/test/resources/cadd/AnnotatorUpdateIT_CADD_ESP6500SI_7lines.tsv.gz", -1);
 
 				Iterator<Entity> updateIt = caddAnnotatorUpdating.annotate(repo, true);
 				assertNotNull(updateIt);

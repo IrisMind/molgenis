@@ -1,10 +1,10 @@
 package org.molgenis.data.annotation.resources.impl;
 
-import java.io.File;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+
+import java.io.File;
 
 /**
  * Created by charbonb on 16/06/15.
@@ -29,5 +29,11 @@ public class SingleResourceConfig implements ResourceConfig
 			return new File(file);
 		}
 		return null;
+	}
+
+	@Override
+	public Integer getRedisDBIndex()
+	{
+		return RunAsSystemProxy.runAsSystem(() -> pluginSettings.getInt("redisDBIndex"));
 	}
 }

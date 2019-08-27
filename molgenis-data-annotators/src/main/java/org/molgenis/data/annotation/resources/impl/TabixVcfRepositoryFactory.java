@@ -1,10 +1,10 @@
 package org.molgenis.data.annotation.resources.impl;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotator.tabix.TabixVcfRepository;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Factory that can create a {@link TabixVcfRepository}. The name of the repository is configured in the factory.
@@ -22,6 +22,12 @@ public class TabixVcfRepositoryFactory implements RepositoryFactory
 	public Repository createRepository(File file) throws IOException
 	{
 		return new TabixVcfRepository(file, name);
+	}
+
+	@Override
+	public Repository createRepository(File file, Integer redisDBIndex) throws IOException
+	{
+		return new TabixVcfRepository(file, redisDBIndex, name);
 	}
 
 }

@@ -1,16 +1,5 @@
 package org.molgenis.data.annotator.tabix;
 
-import static java.util.stream.Collectors.toList;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Stream;
-
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
@@ -22,6 +11,17 @@ import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.testng.Assert.assertEquals;
 
 public class TabixVcfRepositoryTest
 {
@@ -43,7 +43,7 @@ public class TabixVcfRepositoryTest
 		Mockito.when(vcfReaderFactory.get()).thenReturn(vcfReader);
 		VcfMeta vcfMeta = new VcfMeta();
 		Mockito.when(vcfReader.getVcfMeta()).thenReturn(vcfMeta);
-		tabixVcfRepository = new TabixVcfRepository(vcfReaderFactory, tabixReader, "MyEntity");
+		tabixVcfRepository = new TabixVcfRepository(vcfReaderFactory, tabixReader, 2, "MyEntity");
 		entityMetaData = tabixVcfRepository.getEntityMetaData();
 	}
 
